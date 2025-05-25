@@ -1,0 +1,160 @@
+#ifndef DEFINES_H
+#define DEFINES_H
+
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_adc/adc_oneshot.h"
+
+
+//------------------------------------------------------------------------------user need to define here
+#define RealTimeASB 1 // 1 is auto realtime send, 0 is stop 
+#define ONCountSW1 10  // number of consecutive series
+#define OFFCountSW1 10 // number of consecutive series
+#define ONCountSW2 10  // number of consecutive series
+#define OFFCountSW2 10 // number of consecutive series
+
+#define ONCountConnSensor1 10  // number of consecutive series
+#define OFFCountConnSensor1 10 // number of consecutive series
+#define ONCountConnSensor2 10  // number of consecutive series
+#define OFFCountConnSensor2 10 // number of consecutive series
+#define ONCountConnSensor3 10  // number of consecutive series
+#define OFFCountConnSensor3 10 // number of consecutive series
+#define ONCountConnSensor4 10  // number of consecutive series
+#define OFFCountConnSensor4 10 // number of consecutive series
+
+#define SW1Polarity 1 // 1 is HIGH, 0 is LOW
+#define SW2Polarity 1 // 1 is HIGH, 0 is LOW
+
+#define Drawer1Polarity 1 // 1 is HIGH, 0 is LOW
+#define Drawer2Polarity 1 // 1 is HIGH, 0 is LOW
+#define Drawer3Polarity 1 // 1 is HIGH, 0 is LOW
+#define Drawer4Polarity 1 // 1 is HIGH, 0 is LOW
+
+#define TaskDelayTime 500
+//------------------------------------------------------------------------------user end to define here
+#define VALUE12BITADC 4095.0
+#define VALUE11BITADC 2047.0
+#define VALUEB10ITADC 1023.0
+#define VALUEB9ITADC 511.0
+
+#define DK1_CNT GPIO_NUM_7
+#define DK2_CNT GPIO_NUM_8
+#define DK3_CNT GPIO_NUM_16
+#define DK4_CNT GPIO_NUM_17
+
+#define DK_SW1 GPIO_NUM_9
+#define DK_SW2 GPIO_NUM_18
+
+#define DK1_SNS GPIO_NUM_1
+#define ADC_WIDTH_CHANNEL0 ADC_WIDTH_BIT_12
+#define ADC_ATTEN_CHANNEL0 ADC_ATTEN_DB_12
+
+#if (ADC_WIDTH_CHANNEL0 == ADC_WIDTH_BIT_12)
+#define ADC_VALUE_CHANNEL0 VALUE12BITADC
+#elif (ADC_WIDTH_CHANNEL0 == ADC_WIDTH_BIT_11)
+#define ADC_VALUE_CHANNEL0 VALUE11BITADC
+#elif (ADC_WIDTH_CHANNEL0 == ADC_WIDTH_BIT_10)
+#define ADC_VALUE_CHANNEL0 VALUE10BITADC
+#else
+#define ADC_VALUE_CHANNEL0 VALUE9BITADC // Default case
+#endif
+
+#define DK2_SNS GPIO_NUM_2
+#define ADC_WIDTH_CHANNEL1 ADC_WIDTH_BIT_12
+#define ADC_ATTEN_CHANNEL1 ADC_ATTEN_DB_12
+
+#if (ADC_WIDTH_CHANNEL1 == ADC_WIDTH_BIT_12)
+#define ADC_VALUE_CHANNEL1 VALUE12BITADC
+#elif (ADC_WIDTH_CHANNEL1 == ADC_WIDTH_BIT_11)
+#define ADC_VALUE_CHANNEL1 VALUE11BITADC
+#elif (ADC_WIDTH_CHANNEL1 == ADC_WIDTH_BIT_10)
+#define ADC_VALUE_CHANNEL1 VALUE10BITADC
+#else
+#define ADC_VALUE_CHANNEL1 VALUE9BITADC // Default case
+#endif
+
+#define DK3_SNS GPIO_NUM_4
+#define ADC_WIDTH_CHANNEL3 ADC_WIDTH_BIT_12
+#define ADC_ATTEN_CHANNEL3 ADC_ATTEN_DB_12
+
+#if (ADC_WIDTH_CHANNEL3 == ADC_WIDTH_BIT_12)
+#define ADC_VALUE_CHANNEL3 VALUE12BITADC
+#elif (ADC_WIDTH_CHANNEL3 == ADC_WIDTH_BIT_11)
+#define ADC_VALUE_CHANNEL3 VALUE11BITADC
+#elif (ADC_WIDTH_CHANNEL3 == ADC_WIDTH_BIT_10)
+#define ADC_VALUE_CHANNEL3 VALUE10BITADC
+#else
+#define ADC_VALUE_CHANNEL3 VALUE9BITADC // Default case
+#endif
+
+#define DK4_SNS GPIO_NUM_5
+#define ADC_WIDTH_CHANNEL4 ADC_WIDTH_BIT_12
+#define ADC_ATTEN_CHANNEL4 ADC_ATTEN_DB_12
+
+#if (ADC_WIDTH_CHANNEL4 == ADC_WIDTH_BIT_12)
+#define ADC_VALUE_CHANNEL4 VALUE12BITADC
+#elif (ADC_WIDTH_CHANNEL4 == ADC_WIDTH_BIT_11)
+#define ADC_VALUE_CHANNEL4 VALUE11BITADC
+#elif (ADC_WIDTH_CHANNEL4 == ADC_WIDTH_BIT_10)
+#define ADC_VALUE_CHANNEL4 VALUE10BITADC
+#else
+#define ADC_VALUE_CHANNEL4 VALUE9BITADC // Default case
+#endif
+
+#define LED_BLUE GPIO_NUM_38
+#define LED_RED GPIO_NUM_39
+#define LED_GREEN GPIO_NUM_40
+
+#define VM_SNS GPIO_NUM_6
+#define ADC_WIDTH_CHANNEL5 ADC_WIDTH_BIT_12
+#define ADC_ATTEN_CHANNEL5 ADC_ATTEN_DB_12
+
+#define VM_EN GPIO_NUM_21
+#define Push_Switch GPIO_NUM_41
+
+#define GPIO_UNUSE3 GPIO_NUM_3
+#define GPIO_UNUSE42 GPIO_NUM_42
+// #define GPIO_UNUSE43 GPIO_NUM_43 // TXD0 debug pin USER don't need to set up
+// #define GPIO_UNUSE44 GPIO_NUM_44 // RXD0 debug pin USER don't need to set up
+#define GPIO_UNUSE45 GPIO_NUM_45
+#define GPIO_UNUSE46 GPIO_NUM_46
+#define GPIO_UNUSE47 GPIO_NUM_47
+#define GPIO_UNUSE48 GPIO_NUM_48
+
+// esp define
+#define VOLTAGE_THRESHOLD 23.5 // threshold run drawer
+#define V_COVERT 42 / 3
+#define V_REF 3.3    // voltage reference of esp32
+#define LOGICVOL 1.5 // COMMON HIGH LEVEL IN CASE OVER THIS LOGICVOL
+#define LOGICVOL_DRAWER1 LOGICVOL
+#define LOGICVOL_DRAWER2 LOGICVOL
+#define LOGICVOL_DRAWER3 LOGICVOL
+#define LOGICVOL_DRAWER4 LOGICVOL
+// Data types
+typedef unsigned int WORD;
+typedef unsigned char BYTE;
+
+#define UART_PORT_NUM UART_NUM_0
+#define UART_BAUD_RATE 115200
+#define BUF_SIZE 1024
+
+// Return codes
+typedef enum
+{
+    ER_OK,  // Normal end
+    ER_PAR, // Out-of-range argument
+    ER_OBJ  // Illegal processing
+} ER_T;
+
+#define ESC "1B"
+#define BEL "07"
+#define FS "1C"
+#define SUB "1A"
+#define EM "19"
+#define DC3 "13"
+#define DC4 "14"
+
+#endif

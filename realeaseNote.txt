@@ -1,0 +1,9 @@
+//Release version 1.0
+No warning, no error.
+Requirement to build project:
+-Delete folder and file:
++ .vscode
++ build
++ managed_components
++ dependencies.lock
++ sdkconfig.old
