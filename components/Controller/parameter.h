@@ -1,5 +1,5 @@
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef PARAMETER_H
+#define PARAMETER_H
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -7,34 +7,10 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_adc/adc_oneshot.h"
+#include "../defines.h"
 
 
-//------------------------------------------------------------------------------user need to define here
-#define RealTimeASB 1 // 1 is auto realtime send, 0 is stop 
-#define ONCountSW1 10  // number of consecutive series
-#define OFFCountSW1 10 // number of consecutive series
-#define ONCountSW2 10  // number of consecutive series
-#define OFFCountSW2 10 // number of consecutive series
 
-#define ONCountConnSensor1 10  // number of consecutive series
-#define OFFCountConnSensor1 10 // number of consecutive series
-#define ONCountConnSensor2 10  // number of consecutive series
-#define OFFCountConnSensor2 10 // number of consecutive series
-#define ONCountConnSensor3 10  // number of consecutive series
-#define OFFCountConnSensor3 10 // number of consecutive series
-#define ONCountConnSensor4 10  // number of consecutive series
-#define OFFCountConnSensor4 10 // number of consecutive series
-
-#define SW1Polarity 1 // 1 is HIGH, 0 is LOW
-#define SW2Polarity 1 // 1 is HIGH, 0 is LOW
-
-#define Drawer1Polarity 1 // 1 is HIGH, 0 is LOW
-#define Drawer2Polarity 1 // 1 is HIGH, 0 is LOW
-#define Drawer3Polarity 1 // 1 is HIGH, 0 is LOW
-#define Drawer4Polarity 1 // 1 is HIGH, 0 is LOW
-
-#define TaskDelayTime 500
-//------------------------------------------------------------------------------user end to define here
 #define VALUE12BITADC 4095.0
 #define VALUE11BITADC 2047.0
 #define VALUEB10ITADC 1023.0
@@ -125,7 +101,6 @@
 #define GPIO_UNUSE48 GPIO_NUM_48
 
 // esp define
-#define VOLTAGE_THRESHOLD 23.5 // threshold run drawer
 #define V_COVERT 42 / 3
 #define V_REF 3.3    // voltage reference of esp32
 #define LOGICVOL 1.5 // COMMON HIGH LEVEL IN CASE OVER THIS LOGICVOL

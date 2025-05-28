@@ -1,7 +1,7 @@
 #ifndef WIFI_H
 #define WIFI_H
 
-#include "../CUI/defines.h"
+#include "../defines.h"
 
 #include <stdint.h>
 #include "esp_err.h"

@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include "esp_err.h"
-#include "defines.h"
+#include "parameter.h"
 
 // Function Declarations
 void InitDrawer2ADC(adc_oneshot_unit_handle_t adc_handle);

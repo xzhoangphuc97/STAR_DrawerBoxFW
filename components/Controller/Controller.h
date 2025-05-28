@@ -1,7 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "defines.h"
+#include "parameter.h"
 #include <stdbool.h>
 #include <string.h>
 #include "esp_err.h"

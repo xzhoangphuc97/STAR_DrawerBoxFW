@@ -2,7 +2,7 @@
 #define DRAWER3_H
 
 #include "driver/gpio.h"
-#include "defines.h"
+#include "parameter.h"
 
 void InitDrawer3(void);                               // Declaration of the function
 ER_T DriveDrawer3(uint16_t onTime, uint16_t offTime); // Drive Drawer 3

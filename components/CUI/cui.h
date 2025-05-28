@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include "defines.h"
+#include "../defines.h"
 #include "ethernet.h"
 #include "wifi.h"
 #include "usb_cdc.h"

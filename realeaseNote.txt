@@ -7,3 +7,9 @@ Requirement to build project:
 + managed_components
 + dependencies.lock
 + sdkconfig.old
+
+// Release 27May (Hai->Phuc)
++ Update from source code STAR_DrawerBoxFW_release_21May.zip that Phuc send to CMEJ via MS Teams
++ Update defines and wifi.c for Country_code and Tx_max_power as customers expectation 
++ Move components/CUI/defines.h to components/defines.h to help Controller Block can insert Controller's variable defination 
++ #define ETH_DHCP_ENABLE false   // Not Support Yes. Not able use the lib(https://github.com/Wiznet/ioLibrary_Driver) for implement because it has a lot of erorrs, So I implemented the DHCP algorithm using SPI and access W5100s Registers but not success yet

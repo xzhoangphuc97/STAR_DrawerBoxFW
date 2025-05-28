@@ -4,7 +4,7 @@
 #include "esp_err.h"
 #include <stdbool.h>
 #include <stddef.h>
-#include "../CUI/defines.h"
+#include "../defines.h"
 
 // W5100S Register Addresses and Command Values
 #define W5100S_SIPR0     0x000F  // Source IP Address

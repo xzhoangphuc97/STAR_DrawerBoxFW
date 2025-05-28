@@ -6,7 +6,7 @@
 #include "esp_netif.h"
 #include "lwip/ip4_addr.h"
 #include "nvs_flash.h"
-#include "../CUI/defines.h"
+#include "../defines.h"
 #include "cui.h"
 #include "wifi.h"
 #include <sys/socket.h>
@@ -621,9 +621,25 @@ void wifi_init(void) {
     ESP_ERROR_CHECK(esp_wifi_set_ps(WIFI_PS_NONE));
     ESP_LOGI(TAG, "Wi-Fi power save disabled");
 
+    // Additional Step: Set country code
+    ESP_ERROR_CHECK(esp_wifi_set_country_code(WIFI_COUNTRY_CODE, WIFI_ieee80211d));
+    wifi_country_t country;
+    ESP_ERROR_CHECK(esp_wifi_get_country(&country));
+    ESP_LOGI(TAG, "Wi-Fi country code  : %s", country.cc);
+    ESP_LOGI(TAG, "Wi-Fi start channel : %d", country.schan);
+    ESP_LOGI(TAG, "Wi-Fi total channel : %d", country.nchan);
+    ESP_LOGI(TAG, "Wi-Fi max_tx_power  : %d", country.max_tx_power);
+    ESP_LOGI(TAG, "Wi-Fi country policy: %s", (country.policy == WIFI_COUNTRY_POLICY_AUTO) ? "AUTO" : "MANUAL");
+
     // Step 17: Start Wi-Fi driver
     ESP_ERROR_CHECK(esp_wifi_start());
     ESP_LOGI(TAG, "Wi-Fi started");
+
+    // Additional Step: Set Wi-Fi max_tx_power after calling esp_wifi_start()
+    ESP_ERROR_CHECK(esp_wifi_set_max_tx_power(WIFI_MAX_TX_POWER));  // set
+    int8_t power;
+    ESP_ERROR_CHECK(esp_wifi_get_max_tx_power(&power));             // get
+    ESP_LOGI(TAG, "Wi-Fi max_tx_power: %d (%.1f[dBm])", power, ((float)power / 4));
 }
 
 void wifi_reset(void) {

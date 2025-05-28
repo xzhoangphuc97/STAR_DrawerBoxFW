@@ -7,7 +7,7 @@
 #include "esp_log.h"
 #include "driver/gpio.h"
 #include "driver/spi_master.h"
-#include "../CUI/defines.h"
+#include "../defines.h"
 #include "ethernet.h"
 
 static const char *TAG = "ethernet";
@@ -425,46 +425,284 @@ esp_err_t ethernet_buffer_read(uint8_t *data, size_t *len) {
     return ESP_OK;
 }
 
+// static void tcp_server_task(void *pvParameters) {
+//     // TCP server task for Ethernet communication
+//     // Step 1: Log task start
+//     uint8_t data;
+//     esp_err_t ret;
+//     ESP_LOGI(TAG, "TCP server task started; %d buffers available", BUFFER_SIZE);
+//     // Step 2: Configure socket for TCP mode
+//     data = 0x01;
+//     ret = w5100s_write_reg(W5100S_S0_MR, &data, 1);
+//     if (ret != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to set TCP mode: %s", esp_err_to_name(ret));
+//         goto cleanup;
+//     }
+//     // Step 3: Open socket
+//     data = W5100S_S0_CR_OPEN;
+//     ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//     if (ret != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to open socket: %s", esp_err_to_name(ret));
+//         goto cleanup;
+//     }
+//     vTaskDelay(pdMS_TO_TICKS(10));
+//     ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+//     if (ret != ESP_OK || data != W5100S_SOCK_INIT) {
+//         ESP_LOGE(TAG, "Socket not initialized, status: 0x%02X", data);
+//         goto cleanup;
+//     }
+//     // Step 4: Set socket to listen
+//     data = W5100S_S0_CR_LISTEN;
+//     ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//     if (ret != ESP_OK) {
+//         ESP_LOGE(TAG, "Failed to listen: %s", esp_err_to_name(ret));
+//         goto cleanup;
+//     }
+//     vTaskDelay(pdMS_TO_TICKS(10));
+//     ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+//     if (ret != ESP_OK || data != W5100S_SOCK_LISTEN) {
+//         ESP_LOGE(TAG, "Socket not listening, status: 0x%02X", data);
+//         goto cleanup;
+//     }
+//     ESP_LOGI(TAG, "TCP server listening on %s:%d", ETH_IP_ADDR, ETH_PORT);
+//     // Step 5: Enter main loop
+//     while (1) {
+//         // Step 6: Check socket status
+//         ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+//         if (ret != ESP_OK) {
+//             ESP_LOGW(TAG, "Failed to read socket status: %s", esp_err_to_name(ret));
+//             vTaskDelay(pdMS_TO_TICKS(200));
+//             continue;
+//         }
+//         if (data == W5100S_SOCK_ESTABLISHED) {
+//             // Step 7: Handle established connection
+//             uint16_t rx_size;
+//             ret = w5100s_read_reg(W5100S_S0_RX_RSR0, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to read RX size: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             rx_size = data << 8;
+//             ret = w5100s_read_reg(W5100S_S0_RX_RSR0 + 1, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to read RX size low byte: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             rx_size |= data;
+//             if (rx_size > 0) {
+//                 if (rx_size > DATA_SIZE - 1) rx_size = DATA_SIZE - 1;
+//                 uint16_t rx_rd;
+//                 ret = w5100s_read_reg(W5100S_S0_RX_RD0, &data, 1);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to read RX pointer: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//                 rx_rd = data << 8;
+//                 ret = w5100s_read_reg(W5100S_S0_RX_RD0 + 1, &data, 1);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to read RX pointer low byte: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//                 rx_rd |= data;
+//                 uint8_t temp_buffer[DATA_SIZE];
+//                 ret = w5100s_read_reg(0x6000 + (rx_rd & 0x07FF), temp_buffer, rx_size);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to read RX buffer: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//                 temp_buffer[rx_size] = '\0';
+//                 ret = ethernet_buffer_write(temp_buffer, rx_size);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to write to Ethernet buffer: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//                 ethernet_send_data(temp_buffer, rx_size);
+//                 rx_rd += rx_size;
+//                 data = (rx_rd >> 8) & 0xFF;
+//                 ret = w5100s_write_reg(W5100S_S0_RX_RD0, &data, 1);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to write RX pointer: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//                 data = rx_rd & 0xFF;
+//                 ret = w5100s_write_reg(W5100S_S0_RX_RD0 + 1, &data, 1);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to write RX pointer low byte: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//                 data = W5100S_S0_CR_RECV;
+//                 ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//                 if (ret != ESP_OK) {
+//                     ESP_LOGW(TAG, "Failed to issue RECV command: %s", esp_err_to_name(ret));
+//                     vTaskDelay(pdMS_TO_TICKS(200));
+//                     continue;
+//                 }
+//             }
+//         } else if (data == W5100S_SOCK_CLOSE_WAIT) {
+//             // Step 8: Handle close-wait state
+//             ESP_LOGI(TAG, "Socket in CLOSE_WAIT, closing...");
+//             data = W5100S_S0_CR_CLOSE;
+//             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to close socket: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             data = W5100S_S0_CR_OPEN;
+//             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to re-open socket: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             vTaskDelay(pdMS_TO_TICKS(10));
+//             ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+//             if (ret != ESP_OK || data != W5100S_S0_CR_OPEN) {
+//                 ESP_LOGW(TAG, "Socket not re-initialized, status: 0x%02X", data);
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             data = W5100S_S0_CR_LISTEN;
+//             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to re-listen: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             ESP_LOGI(TAG, "Socket re-opened and listening");
+//         } else if (data == W5100S_SOCK_CLOSED) {
+//             // Step 9: Handle closed state
+//             ESP_LOGW(TAG, "Socket signed unexpectedly, reinitializing...");
+//             data = W5100S_S0_CR_CLOSE;
+//             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to close socket: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             data = 0x01;
+//             ret = w5100s_write_reg(W5100S_S0_MR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to set TCP mode: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             data = W5100S_S0_CR_OPEN;
+//             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to open socket: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             vTaskDelay(pdMS_TO_TICKS(10));
+//             ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+//             if (ret != ESP_OK || data != W5100S_SOCK_INIT) {
+//                 ESP_LOGW(TAG, "Socket not initialized, status: 0x%02X", data);
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             data = W5100S_S0_CR_LISTEN;
+//             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//             if (ret != ESP_OK) {
+//                 ESP_LOGW(TAG, "Failed to listen: %s", esp_err_to_name(ret));
+//                 vTaskDelay(pdMS_TO_TICKS(200));
+//                 continue;
+//             }
+//             ESP_LOGI(TAG, "Socket reinitialized and listening");
+//         }
+//         // Step 10: Delay for 10ms
+//         vTaskDelay(pdMS_TO_TICKS(10));
+//     }
+//     // Step 11: Clean up on failure
+// cleanup:
+//     data = W5100S_S0_CR_CLOSE;
+//     w5100s_write_reg(W5100S_S0_CR, &data, 1);
+//     ESP_LOGE(TAG, "TCP server task terminated");
+//     vTaskDelete(NULL);
+// }
+
+static bool initialize_socket(void) {
+    // Helper function to initialize or reinitialize the socket
+    uint8_t data;
+    esp_err_t ret;
+    int retries = 5;
+
+    // Step 2: Configure socket for TCP mode
+    data = 0x01;
+    ret = w5100s_write_reg(W5100S_S0_MR, &data, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set TCP mode: %s", esp_err_to_name(ret));
+        return false;
+    }
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    // Step 3: Open socket
+    data = W5100S_S0_CR_OPEN;
+    ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to open socket: %s", esp_err_to_name(ret));
+        return false;
+    }
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    // Verify socket initialization
+    while (retries-- > 0) {
+        ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+        if (ret == ESP_OK && data == W5100S_SOCK_INIT) {
+            break;
+        }
+        ESP_LOGW(TAG, "Socket not initialized, status: 0x%02X, retries left: %d", data, retries);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    if (ret != ESP_OK || data != W5100S_SOCK_INIT) {
+        ESP_LOGE(TAG, "Socket not initialized, status: 0x%02X", data);
+        return false;
+    }
+
+    // Step 4: Set socket to listen
+    data = W5100S_S0_CR_LISTEN;
+    ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to listen: %s", esp_err_to_name(ret));
+        return false;
+    }
+    vTaskDelay(pdMS_TO_TICKS(50));
+
+    // Verify listening state
+    retries = 5;
+    while (retries-- > 0) {
+        ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+        if (ret == ESP_OK && data == W5100S_SOCK_LISTEN) {
+            ESP_LOGI(TAG, "TCP server listening on %s:%d", ETH_IP_ADDR, ETH_PORT);
+            return true;
+        }
+        ESP_LOGW(TAG, "Socket not listening, status: 0x%02X, retries left: %d", data, retries);
+        vTaskDelay(pdMS_TO_TICKS(100));
+    }
+    ESP_LOGE(TAG, "Socket not listening, status: 0x%02X", data);
+    return false;
+}
+
 static void tcp_server_task(void *pvParameters) {
     // TCP server task for Ethernet communication
     // Step 1: Log task start
     uint8_t data;
     esp_err_t ret;
     ESP_LOGI(TAG, "TCP server task started; %d buffers available", BUFFER_SIZE);
-    // Step 2: Configure socket for TCP mode
-    data = 0x01;
-    ret = w5100s_write_reg(W5100S_S0_MR, &data, 1);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set TCP mode: %s", esp_err_to_name(ret));
+
+    // Initial socket setup
+    if (!initialize_socket()) {
         goto cleanup;
     }
-    // Step 3: Open socket
-    data = W5100S_S0_CR_OPEN;
-    ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to open socket: %s", esp_err_to_name(ret));
-        goto cleanup;
-    }
-    vTaskDelay(pdMS_TO_TICKS(10));
-    ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
-    if (ret != ESP_OK || data != W5100S_SOCK_INIT) {
-        ESP_LOGE(TAG, "Socket not initialized, status: 0x%02X", data);
-        goto cleanup;
-    }
-    // Step 4: Set socket to listen
-    data = W5100S_S0_CR_LISTEN;
-    ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to listen: %s", esp_err_to_name(ret));
-        goto cleanup;
-    }
-    vTaskDelay(pdMS_TO_TICKS(10));
-    ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
-    if (ret != ESP_OK || data != W5100S_SOCK_LISTEN) {
-        ESP_LOGE(TAG, "Socket not listening, status: 0x%02X", data);
-        goto cleanup;
-    }
-    ESP_LOGI(TAG, "TCP server listening on %s:%d", ETH_IP_ADDR, ETH_PORT);
+
     // Step 5: Enter main loop
     while (1) {
         // Step 6: Check socket status
@@ -546,41 +784,11 @@ static void tcp_server_task(void *pvParameters) {
                     continue;
                 }
             }
-        } else if (data == W5100S_SOCK_CLOSE_WAIT) {
+        } else if (data == W5100S_SOCK_CLOSE_WAIT || data == W5100S_SOCK_CLOSED) {
             // Step 8: Handle close-wait state
-            ESP_LOGI(TAG, "Socket in CLOSE_WAIT, closing...");
-            data = W5100S_S0_CR_CLOSE;
-            ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-            if (ret != ESP_OK) {
-                ESP_LOGW(TAG, "Failed to close socket: %s", esp_err_to_name(ret));
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
-            }
-            data = W5100S_S0_CR_OPEN;
-            ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-            if (ret != ESP_OK) {
-                ESP_LOGW(TAG, "Failed to re-open socket: %s", esp_err_to_name(ret));
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
-            }
-            vTaskDelay(pdMS_TO_TICKS(10));
-            ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
-            if (ret != ESP_OK || data != W5100S_S0_CR_OPEN) {
-                ESP_LOGW(TAG, "Socket not re-initialized, status: 0x%02X", data);
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
-            }
-            data = W5100S_S0_CR_LISTEN;
-            ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-            if (ret != ESP_OK) {
-                ESP_LOGW(TAG, "Failed to re-listen: %s", esp_err_to_name(ret));
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
-            }
-            ESP_LOGI(TAG, "Socket re-opened and listening");
-        } else if (data == W5100S_SOCK_CLOSED) {
             // Step 9: Handle closed state
-            ESP_LOGW(TAG, "Socket signed unexpectedly, reinitializing...");
+            ESP_LOGI(TAG, "Socket in %s, reinitializing...", data == W5100S_SOCK_CLOSE_WAIT ? "CLOSE_WAIT" : "CLOSED");
+            // Close socket
             data = W5100S_S0_CR_CLOSE;
             ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
             if (ret != ESP_OK) {
@@ -588,38 +796,33 @@ static void tcp_server_task(void *pvParameters) {
                 vTaskDelay(pdMS_TO_TICKS(200));
                 continue;
             }
-            data = 0x01;
-            ret = w5100s_write_reg(W5100S_S0_MR, &data, 1);
-            if (ret != ESP_OK) {
-                ESP_LOGW(TAG, "Failed to set TCP mode: %s", esp_err_to_name(ret));
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
+            vTaskDelay(pdMS_TO_TICKS(100));
+            // Verify socket is closed
+            int retries = 5;
+            while (retries-- > 0) {
+                ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
+                if (ret == ESP_OK && data == W5100S_SOCK_CLOSED) {
+                    break;
+                }
+                ESP_LOGW(TAG, "Socket not closed, status: 0x%02X, retries left: %d", data, retries);
+                vTaskDelay(pdMS_TO_TICKS(100));
             }
-            data = W5100S_S0_CR_OPEN;
-            ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-            if (ret != ESP_OK) {
-                ESP_LOGW(TAG, "Failed to open socket: %s", esp_err_to_name(ret));
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
+            if (ret != ESP_OK || data != W5100S_SOCK_CLOSED) {
+                ESP_LOGE(TAG, "Socket failed to close, status: 0x%02X", data);
+                // Perform hardware reset as fallback
+                ESP_LOGI(TAG, "Performing hardware reset due to socket closure failure");
+                reset_init();
             }
-            vTaskDelay(pdMS_TO_TICKS(10));
-            ret = w5100s_read_reg(W5100S_S0_SR, &data, 1);
-            if (ret != ESP_OK || data != W5100S_SOCK_INIT) {
-                ESP_LOGW(TAG, "Socket not initialized, status: 0x%02X", data);
-                vTaskDelay(pdMS_TO_TICKS(200));
-                continue;
-            }
-            data = W5100S_S0_CR_LISTEN;
-            ret = w5100s_write_reg(W5100S_S0_CR, &data, 1);
-            if (ret != ESP_OK) {
-                ESP_LOGW(TAG, "Failed to listen: %s", esp_err_to_name(ret));
+            // Reinitialize socket
+            if (!initialize_socket()) {
+                ESP_LOGE(TAG, "Failed to reinitialize socket");
                 vTaskDelay(pdMS_TO_TICKS(200));
                 continue;
             }
             ESP_LOGI(TAG, "Socket reinitialized and listening");
         }
         // Step 10: Delay for 10ms
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
     // Step 11: Clean up on failure
 cleanup:

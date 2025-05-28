@@ -12,7 +12,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <esp_random.h>
-#include "../components/CUI/defines.h"
+#include "../components/defines.h"
 
 
 // Logging tag for main

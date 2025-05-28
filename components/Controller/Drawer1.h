@@ -2,7 +2,7 @@
 #define DRAWER1_H
 
 #include "driver/gpio.h"
-#include "defines.h"
+#include "parameter.h"
 
 void InitDrawer1(void);                               // Declaration of the function
 ER_T DriveDrawer1(uint16_t onTime, uint16_t offTime); // Drive Drawer 1
