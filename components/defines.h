@@ -68,12 +68,18 @@
 #define WIFI_AP_TCP_PORT  12346
 
 // Wi-Fi security types (values match wifi_auth_mode_t in esp_wifi_types.h)
-#define WIFI_SECURITY_OPEN 0                     // Open (no security)
-#define WIFI_SECURITY_WPA 1                      // WPA-Personal
-#define WIFI_SECURITY_WPA2 2                     // WPA2-Personal
-#define WIFI_SECURITY_WPA3 4                     // WPA3-Personal
-#define WIFI_SECURITY_DEFAULT WIFI_SECURITY_WPA2 // Default security type
+#define WIFI_STA_SECURITY_OPEN 0                     // Open (no security)
+#define WIFI_STA_SECURITY_WPA 1                      // WPA-Personal
+#define WIFI_STA_SECURITY_WPA2 2                     // WPA2-Personal
+#define WIFI_STA_SECURITY_WPA3 4                     // WPA3-Personal
+#define WIFI_STA_SECURITY_DEFAULT WIFI_STA_SECURITY_WPA // Default security type
 
+// Wi-Fi security types (values match wifi_auth_mode_t in esp_wifi_types.h)
+#define WIFI_AP_SECURITY_OPEN 0                     // Open (no security)
+#define WIFI_AP_SECURITY_WPA 1                      // WPA-Personal //Not support AP mode
+#define WIFI_AP_SECURITY_WPA2 2                     // WPA2-Personal
+#define WIFI_AP_SECURITY_WPA3 4                     // WPA3-Personal
+#define WIFI_AP_SECURITY_DEFAULT WIFI_AP_SECURITY_WPA // Default security type
 
 // Wi-Fi country code
 /* Able to specify the following strings

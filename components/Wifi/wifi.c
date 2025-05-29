@@ -489,7 +489,7 @@ void wifi_init(void) {
         .sta = {
             .ssid = WIFI_STA_SSID,
             .password = WIFI_STA_PASSWORD,
-            .threshold.authmode = WIFI_SECURITY_DEFAULT,
+            .threshold.authmode = WIFI_STA_SECURITY_DEFAULT,
             .pmf_cfg = {
                 .capable = true,
                 .required = false
@@ -501,26 +501,26 @@ void wifi_init(void) {
     };
 
     // Step 8: Adjust STA security settings
-    switch (WIFI_SECURITY_DEFAULT) {
-        case WIFI_SECURITY_OPEN:
+    switch (WIFI_STA_SECURITY_DEFAULT) {
+        case WIFI_STA_SECURITY_OPEN:
             sta_config.sta.threshold.authmode = WIFI_AUTH_OPEN;
             sta_config.sta.password[0] = '\0';
             ESP_LOGI(TAG, "STA security set to OPEN");
             break;
-        case WIFI_SECURITY_WPA:
+        case WIFI_STA_SECURITY_WPA:
             sta_config.sta.threshold.authmode = WIFI_AUTH_WPA_PSK;
             ESP_LOGI(TAG, "STA security set to WPA-Personal");
             break;
-        case WIFI_SECURITY_WPA2:
+        case WIFI_STA_SECURITY_WPA2:
             sta_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
             ESP_LOGI(TAG, "STA security set to WPA2-Personal");
             break;
-        case WIFI_SECURITY_WPA3:
+        case WIFI_STA_SECURITY_WPA3:
             sta_config.sta.threshold.authmode = WIFI_AUTH_WPA3_PSK;
             ESP_LOGI(TAG, "STA security set to WPA3-Personal");
             break;
         default:
-            ESP_LOGE(TAG, "Invalid STA security type: %d", WIFI_SECURITY_DEFAULT);
+            ESP_LOGE(TAG, "Invalid STA security type: %d", WIFI_STA_SECURITY_DEFAULT);
             return;
     }
 
@@ -534,7 +534,7 @@ void wifi_init(void) {
             .password = WIFI_AP_PASSWORD,
             .ssid_len = strlen(WIFI_AP_SSID),
             .channel = best_channel,
-            .authmode = WIFI_SECURITY_DEFAULT,
+            // .authmode = WIFI_SECURITY_DEFAULT,
             .max_connection = 2,
             .beacon_interval = 100,
             .pairwise_cipher = WIFI_CIPHER_TYPE_CCMP,
@@ -547,11 +547,29 @@ void wifi_init(void) {
     };
 
     // Step 11: Adjust AP security settings
-    if (ap_config.ap.authmode == WIFI_AUTH_OPEN) {
-        ap_config.ap.password[0] = '\0';
-        ESP_LOGI(TAG, "AP security set to OPEN");
-    } else if (strlen(WIFI_AP_PASSWORD) < 8) {
-        ESP_LOGE(TAG, "AP password too short (<8 chars) for %d", ap_config.ap.authmode);
+    switch (WIFI_AP_SECURITY_DEFAULT) {
+        case WIFI_AP_SECURITY_OPEN:
+            ap_config.ap.authmode = WIFI_AUTH_OPEN;
+            ap_config.ap.password[0] = '\0';
+            ESP_LOGI(TAG, "AP security set to OPEN");
+            break;
+        case WIFI_AP_SECURITY_WPA:
+        case WIFI_AP_SECURITY_WPA2:
+            ap_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
+            ESP_LOGI(TAG, "AP security set to WPA/WPA2-Personal");
+            break;
+        case WIFI_AP_SECURITY_WPA3:
+            ap_config.ap.authmode = WIFI_AUTH_WPA3_PSK;
+            ESP_LOGI(TAG, "AP security set to WPA3-Personal");
+            break;
+        default:
+            ESP_LOGE(TAG, "Invalid AP security type: %d", WIFI_AP_SECURITY_DEFAULT);
+            return;
+    }
+
+    // Step 12: Validate AP password length for non-open modes
+    if (ap_config.ap.authmode != WIFI_AUTH_OPEN && strlen(WIFI_AP_PASSWORD) < 8) {
+        ESP_LOGE(TAG, "AP password too short (<8 chars) for authmode %d", ap_config.ap.authmode);
         return;
     }
 
